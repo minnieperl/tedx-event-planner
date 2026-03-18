@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TEDx Event Planner — Gateway</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --red: #E62B1E;
+  --dark: #0D0D0D;
+  --card: #161616;
+  --border: #2a2a2a;
+  --muted: #666;
+  --text: #f0f0f0;
+  --soft: #aaa;
+  --accent: #ff6b35;
+  --green: #2ecc71;
+  --yellow: #f1c40f;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--dark); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 40px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: rgba(13,13,13,0.95);
+  backdrop-filter: blur(10px); z-index: 100;
+}
+.logo { font-family: 'Playfair Display', serif; font-size: 22px; letter-spacing: -0.5px; }
+.logo span { color: var(--red); }
+.nav-tabs { display: flex; gap: 4px; }
+.nav-tab {
+  padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 13px;
+  font-weight: 500; color: var(--soft); border: none; background: transparent;
+  transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+}
+.nav-tab.active, .nav-tab:hover { background: var(--card); color: var(--text); }
+.nav-tab.active { color: var(--red); }
+.event-badge {
+  background: var(--red); color: #fff; font-size: 11px; font-weight: 500;
+  padding: 4px 12px; border-radius: 20px; font-family: 'DM Mono', monospace;
+}
+
+.page { display: none; padding: 40px; max-width: 1100px; margin: 0 auto; }
+.page.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.page-header { margin-bottom: 32px; }
+.page-header h1 { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 900; line-height: 1.1; }
+.page-header h1 span { color: var(--red); }
+.page-header p { color: var(--soft); font-size: 14px; margin-top: 8px; }
+
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+.stat-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px; position: relative; overflow: hidden;
+}
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--red); }
+.stat-card.green::before { background: var(--green); }
+.stat-card.yellow::before { background: var(--yellow); }
+.stat-card.accent::before { background: var(--accent); }
+.stat-label { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 1px; }
+.stat-value { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 700; margin: 6px 0 2px; }
+.stat-sub { font-size: 12px; color: var(--soft); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+.card-title {
+  font-size: 12px; font-weight: 500; color: var(--muted); font-family: 'DM Mono', monospace;
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.card-title button {
+  background: var(--red); color: #fff; border: none; padding: 5px 12px;
+  border-radius: 5px; font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 500;
+}
+
+input, select, textarea {
+  background: #1e1e1e; border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px;
+  padding: 10px 14px; width: 100%; outline: none; transition: border 0.2s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--red); }
+textarea { resize: vertical; min-height: 80px; }
+label { font-size: 12px; color: var(--soft); display: block; margin-bottom: 6px; font-weight: 500; }
+.form-row { margin-bottom: 14px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.btn {
+  background: var(--red); color: #fff; border: none; padding: 11px 24px;
+  border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--soft); }
+.btn.ghost:hover { border-color: var(--red); color: var(--red); }
+.btn.small { padding: 6px 14px; font-size: 12px; }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 10px 14px; font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); }
+td { padding: 12px 14px; border-bottom: 1px solid #1e1e1e; color: var(--soft); vertical-align: middle; }
+tr:hover td { background: #1a1a1a; }
+td:first-child { color: var(--text); font-weight: 500; }
+
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; font-family: 'DM Mono', monospace; }
+.badge.confirmed { background: rgba(46,204,113,0.15); color: var(--green); }
+.badge.pending { background: rgba(241,196,15,0.15); color: var(--yellow); }
+.badge.cancelled { background: rgba(230,43,30,0.15); color: var(--red); }
+.badge.speaker { background: rgba(255,107,53,0.15); color: var(--accent); }
+.badge.sponsor { background: rgba(155,89,182,0.15); color: #a06cd5; }
+.badge.venue { background: rgba(52,152,219,0.15); color: #5dade2; }
+
+.progress-wrap { margin: 10px 0; }
+.progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--soft); margin-bottom: 6px; }
+.progress-bar { height: 6px; background: #222; border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; background: var(--red); transition: width 0.5s ease; }
+.progress-fill.green { background: var(--green); }
+.progress-fill.yellow { background: var(--yellow); }
+
+.checklist { list-style: none; }
+.checklist li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #1e1e1e; font-size: 13px; color: var(--soft); cursor: pointer; transition: color 0.2s; }
+.checklist li:last-child { border-bottom: none; }
+.checklist li.done { color: var(--muted); text-decoration: line-through; }
+.check-box { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+.checklist li.done .check-box { background: var(--green); border-color: var(--green); }
+.check-box::after { content: '✓'; font-size: 11px; color: #fff; display: none; }
+.checklist li.done .check-box::after { display: block; }
+
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 1px; background: var(--border); }
+.tl-item { position: relative; margin-bottom: 20px; }
+.tl-dot { position: absolute; left: -21px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--red); border: 2px solid var(--dark); }
+.tl-dot.done { background: var(--green); }
+.tl-dot.upcoming { background: var(--border); }
+.tl-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.tl-date { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
+.tl-desc { font-size: 12px; color: var(--soft); margin-top: 4px; }
+
+.speaker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.speaker-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; transition: border-color 0.2s; }
+.speaker-card:hover { border-color: var(--red); }
+.speaker-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; margin: 0 auto 12px; color: #fff; }
+.speaker-name { font-size: 14px; font-weight: 500; }
+.speaker-topic { font-size: 12px; color: var(--soft); margin-top: 4px; }
+.speaker-status { margin-top: 10px; }
+
+.budget-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #1e1e1e; font-size: 13px; }
+.budget-row:last-child { border-bottom: none; }
+.budget-cat { color: var(--soft); }
+.budget-amt { font-family: 'DM Mono', monospace; font-weight: 500; }
+.budget-amt.under { color: var(--green); }
+.budget-total { display: flex; justify-content: space-between; padding: 16px 0 0; font-weight: 500; font-size: 15px; border-top: 1px solid var(--border); margin-top: 8px; }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 480px; max-width: 90vw; animation: fadeIn 0.2s ease; }
+.modal-title { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 20px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+
+.toast { position: fixed; bottom: 30px; right: 30px; background: var(--green); color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; z-index: 300; display: none; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--dark); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+select option { background: #1e1e1e; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">x<span>Gateway</span> Planner</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dashboard', this)">Dashboard</button>
+    <button class="nav-tab" onclick="showPage('speakers', this)">Speakers</button>
+    <button class="nav-tab" onclick="showPage('vendors', this)">Vendors</button>
+    <button class="nav-tab" onclick="showPage('guests', this)">Guests</button>
+    <button class="nav-tab" onclick="showPage('budget', this)">Budget</button>
+    <button class="nav-tab" onclick="showPage('timeline', this)">Timeline</button>
+  </div>
+  <div class="event-badge">TEDxGateway 2025</div>
+</nav>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="page active">
+  <div class="page-header">
+    <h1>Event <span>Overview</span></h1>
+    <p>TEDxGateway 2025 — Mumbai · Dec 14, 2025 · Jio World Convention Centre</p>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">Confirmed Speakers</div><div class="stat-value">6</div><div class="stat-sub">of 10 target</div></div>
+    <div class="stat-card green"><div class="stat-label">Guests Registered</div><div class="stat-value">124</div><div class="stat-sub">of 500 capacity</div></div>
+    <div class="stat-card yellow"><div class="stat-label">Budget Used</div><div class="stat-value">50%</div><div class="stat-sub">₹5L of ₹10L</div></div>
+    <div class="stat-card accent"><div class="stat-label">Days to Event</div><div class="stat-value">87</div><div class="stat-sub">Dec 14, 2025</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Pre-event Checklist</div>
+      <ul class="checklist">
+        <li class="done" onclick="toggleCheck(this)"><div class="check-box"></div> Book venue — Jio World Convention Centre</li>
+        <li class="done" onclick="toggleCheck(this)"><div class="check-box"></div> Confirm AV & lighting vendor</li>
+        <li class="done" onclick="toggleCheck(this)"><div class="check-box"></div> Launch speaker applications</li>
+        <li onclick="toggleCheck(this)"><div class="check-box"></div> Finalise speaker lineup (10 speakers)</li>
+        <li onclick="toggleCheck(this)"><div class="check-box"></div> Open guest registrations</li>
+        <li onclick="toggleCheck(this)"><div class="check-box"></div> Send sponsor decks to 20 companies</li>
+        <li onclick="toggleCheck(this)"><div class="check-box"></div> Coordinate catering for 500 guests</li>
+        <li onclick="toggleCheck(this)"><div class="check-box"></div> Design event branding & stage backdrop</li>
+        <li onclick="toggleCheck(this)"><div class="check-box"></div> Arrange volunteer team (15 people)</li>
+        <li onclick="toggleCheck(this)"><div class="check-box"></div> Confirm live streaming setup</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Budget Snapshot</div>
+        <div class="progress-wrap"><div class="progress-label"><span>Venue</span><span>₹1.2L / ₹2L</span></div><div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div></div>
+        <div class="progress-wrap"><div class="progress-label"><span>AV & Production</span><span>₹1.5L / ₹3L</span></div><div class="progress-bar"><div class="progress-fill yellow" style="width:50%"></div></div></div>
+        <div class="progress-wrap"><div class="progress-label"><span>Catering</span><span>₹0.8L / ₹2L</span></div><div class="progress-bar"><div class="progress-fill green" style="width:40%"></div></div></div>
+        <div class="progress-wrap"><div class="progress-label"><span>Marketing</span><span>₹0.3L / ₹1.5L</span></div><div class="progress-bar"><div class="progress-fill green" style="width:20%"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Quick Notes</div>
+        <textarea placeholder="Add event notes, reminders or ideas..." id="notes-area"></textarea>
+        <button class="btn small" style="margin-top:10px" onclick="showToast('Note saved!')">Save Note</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SPEAKERS -->
+<div id="speakers" class="page">
+  <div class="page-header"><h1>Speaker <span>Management</span></h1><p>Track speaker status, topics and coordination</p></div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
+    <button class="btn" onclick="openModal('speaker-modal')">+ Add Speaker</button>
+  </div>
+  <div class="speaker-grid" id="speaker-grid">
+    <div class="speaker-card"><div class="speaker-avatar">R</div><div class="speaker-name">Rohan Verma</div><div class="speaker-topic">The Future of Climate Tech</div><div class="speaker-status"><span class="badge confirmed">Confirmed</span></div></div>
+    <div class="speaker-card"><div class="speaker-avatar" style="background:#a06cd5">P</div><div class="speaker-name">Priya Nair</div><div class="speaker-topic">Rebuilding Mental Health Systems</div><div class="speaker-status"><span class="badge confirmed">Confirmed</span></div></div>
+    <div class="speaker-card"><div class="speaker-avatar" style="background:var(--accent)">A</div><div class="speaker-name">Arjun Shah</div><div class="speaker-topic">AI & the Creative Economy</div><div class="speaker-status"><span class="badge pending">Pending</span></div></div>
+    <div class="speaker-card"><div class="speaker-avatar" style="background:#5dade2">S</div><div class="speaker-name">Sneha Kulkarni</div><div class="speaker-topic">Women in Deep Tech</div><div class="speaker-status"><span class="badge confirmed">Confirmed</span></div></div>
+    <div class="speaker-card"><div class="speaker-avatar" style="background:#2ecc71">K</div><div class="speaker-name">Karan Mehta</div><div class="speaker-topic">Rethinking Urban Mobility</div><div class="speaker-status"><span class="badge pending">Pending</span></div></div>
+    <div class="speaker-card"><div class="speaker-avatar" style="background:#e74c3c">D</div><div class="speaker-name">Divya Iyer</div><div class="speaker-topic">Storytelling in the Age of AI</div><div class="speaker-status"><span class="badge confirmed">Confirmed</span></div></div>
+  </div>
+</div>
+
+<!-- VENDORS -->
+<div id="vendors" class="page">
+  <div class="page-header"><h1>Vendor <span>Tracker</span></h1><p>Manage all event vendors and contracts</p></div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:20px">
+    <button class="btn" onclick="openModal('vendor-modal')">+ Add Vendor</button>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Vendor Name</th><th>Category</th><th>Contact</th><th>Amount (₹)</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="vendor-body">
+          <tr><td>SoundCraft AV Solutions</td><td><span class="badge venue">AV & Tech</span></td><td>+91 98200 11234</td><td class="budget-amt">1,50,000</td><td><span class="badge confirmed">Contract Signed</span></td><td><button class="btn ghost small">Edit</button></td></tr>
+          <tr><td>The Catering Co.</td><td><span class="badge speaker">Catering</span></td><td>+91 98765 44321</td><td class="budget-amt">80,000</td><td><span class="badge pending">Negotiating</span></td><td><button class="btn ghost small">Edit</button></td></tr>
+          <tr><td>Pixel Studio</td><td><span class="badge sponsor">Branding</span></td><td>+91 99001 55678</td><td class="budget-amt">45,000</td><td><span class="badge confirmed">Contract Signed</span></td><td><button class="btn ghost small">Edit</button></td></tr>
+          <tr><td>FlowerBox Decor</td><td><span class="badge venue">Decor</span></td><td>+91 97700 22345</td><td class="budget-amt">60,000</td><td><span class="badge pending">Pending</span></td><td><button class="btn ghost small">Edit</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- GUESTS -->
+<div id="guests" class="page">
+  <div class="page-header"><h1>Guest <span>List</span></h1><p>Manage registrations and attendance</p></div>
+  <div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+    <input type="text" placeholder="Search guests..." style="max-width:280px" oninput="searchGuests(this.value)"/>
+    <button class="btn" onclick="openModal('guest-modal')" style="margin-left:auto">+ Add Guest</button>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Organisation</th><th>Email</th><th>Type</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="guest-body">
+          <tr><td>Aisha Kapoor</td><td>Google India</td><td>aisha@google.com</td><td><span class="badge speaker">VIP</span></td><td><span class="badge confirmed">Confirmed</span></td><td><button class="btn ghost small">View</button></td></tr>
+          <tr><td>Nikhil Joshi</td><td>IIT Bombay</td><td>nikhil@iitb.ac.in</td><td><span class="badge venue">General</span></td><td><span class="badge confirmed">Confirmed</span></td><td><button class="btn ghost small">View</button></td></tr>
+          <tr><td>Meera Pillai</td><td>TATA Consultancy</td><td>meera@tcs.com</td><td><span class="badge sponsor">Sponsor</span></td><td><span class="badge pending">Pending</span></td><td><button class="btn ghost small">View</button></td></tr>
+          <tr><td>Rahul Desai</td><td>Startup India</td><td>rahul@startupindia.in</td><td><span class="badge venue">General</span></td><td><span class="badge confirmed">Confirmed</span></td><td><button class="btn ghost small">View</button></td></tr>
+          <tr><td>Fatima Sheikh</td><td>FICCI</td><td>fatima@ficci.in</td><td><span class="badge speaker">VIP</span></td><td><span class="badge confirmed">Confirmed</span></td><td><button class="btn ghost small">View</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- BUDGET -->
+<div id="budget" class="page">
+  <div class="page-header"><h1>Budget <span>Manager</span></h1><p>Track event expenses and stay on target</p></div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Expense Breakdown <button onclick="openModal('budget-modal')">+ Add Item</button></div>
+      <div id="budget-list">
+        <div class="budget-row"><span class="budget-cat">Venue Rental</span><span class="budget-amt">₹1,20,000</span></div>
+        <div class="budget-row"><span class="budget-cat">AV & Production</span><span class="budget-amt">₹1,50,000</span></div>
+        <div class="budget-row"><span class="budget-cat">Catering (500 pax)</span><span class="budget-amt">₹80,000</span></div>
+        <div class="budget-row"><span class="budget-cat">Branding & Design</span><span class="budget-amt">₹45,000</span></div>
+        <div class="budget-row"><span class="budget-cat">Marketing & Ads</span><span class="budget-amt">₹30,000</span></div>
+        <div class="budget-row"><span class="budget-cat">Decor & Flowers</span><span class="budget-amt">₹60,000</span></div>
+        <div class="budget-row"><span class="budget-cat">Miscellaneous</span><span class="budget-amt">₹15,000</span></div>
+        <div class="budget-total"><span>Total Spent</span><span class="budget-amt" style="font-size:18px">₹5,00,000</span></div>
+        <div class="budget-total" style="padding-top:8px"><span style="color:var(--soft)">Remaining</span><span class="budget-amt under" style="font-size:18px">₹5,00,000</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Budget Health</div>
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-family:'Playfair Display',serif;font-size:64px;font-weight:900;color:var(--green)">50%</div>
+        <div style="color:var(--soft);font-size:14px;margin-top:4px">of total budget used</div>
+        <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);margin-top:16px">Total Budget: ₹10,00,000</div>
+      </div>
+      <div class="progress-wrap" style="margin-top:10px">
+        <div class="progress-bar" style="height:12px;border-radius:6px"><div class="progress-fill green" style="width:50%;height:100%"></div></div>
+      </div>
+      <div style="margin-top:24px">
+        <div class="budget-row"><span class="budget-cat">Sponsor Income</span><span class="budget-amt under">+ ₹3,00,000</span></div>
+        <div class="budget-row"><span class="budget-cat">Ticket Sales</span><span class="budget-amt under">+ ₹2,50,000</span></div>
+        <div class="budget-total"><span>Net Position</span><span class="budget-amt under">₹7,50,000 surplus</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div id="timeline" class="page">
+  <div class="page-header"><h1>Event <span>Timeline</span></h1><p>Key milestones and day-of schedule</p></div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Pre-event Milestones</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">Venue Confirmed</div><div class="tl-date">Sep 1, 2025</div><div class="tl-desc">Jio World Convention Centre, Mumbai</div></div>
+        <div class="tl-item"><div class="tl-dot done"></div><div class="tl-title">Speaker Applications Open</div><div class="tl-date">Sep 15, 2025</div><div class="tl-desc">Applications live on TEDxGateway website</div></div>
+        <div class="tl-item"><div class="tl-dot"></div><div class="tl-title">Speaker Shortlisting</div><div class="tl-date">Oct 10, 2025</div><div class="tl-desc">Review 200+ applications, select 10 speakers</div></div>
+        <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-title">Guest Registrations Open</div><div class="tl-date">Oct 20, 2025</div><div class="tl-desc">Early bird tickets launch</div></div>
+        <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-title">Speaker Rehearsals</div><div class="tl-date">Dec 10–12, 2025</div><div class="tl-desc">Full run-throughs at venue</div></div>
+        <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-title">Event Day</div><div class="tl-date">Dec 14, 2025</div><div class="tl-desc">TEDxGateway 2025 — Doors open 9:00 AM</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Day-of Schedule — Dec 14</div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-title">Setup & Soundcheck</div><div class="tl-date">07:00 – 09:00 AM</div><div class="tl-desc">AV team, decor, volunteer briefing</div></div>
+        <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-title">Doors Open + Registration</div><div class="tl-date">09:00 AM</div><div class="tl-desc">Guest check-in, badge collection</div></div>
+        <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-title">Opening Ceremony</div><div class="tl-date">10:00 AM</div><div class="tl-desc">Welcome address + first 3 talks</div></div>
+        <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-title">Networking Lunch</div><div class="tl-date">01:00 – 02:00 PM</div><div class="tl-desc">Catered lunch for all guests</div></div>
+        <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-title">Afternoon Talks</div><div class="tl-date">02:00 – 05:00 PM</div><div class="tl-desc">Remaining 7 speakers</div></div>
+        <div class="tl-item"><div class="tl-dot upcoming"></div><div class="tl-title">Closing + After Party</div><div class="tl-date">05:30 PM</div><div class="tl-desc">Closing remarks + networking reception</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="speaker-modal">
+  <div class="modal">
+    <div class="modal-title">Add New Speaker</div>
+    <div class="form-grid">
+      <div class="form-row"><label>Full Name</label><input placeholder="Speaker name" id="sp-name"/></div>
+      <div class="form-row"><label>Talk Topic</label><input placeholder="Talk title" id="sp-topic"/></div>
+    </div>
+    <div class="form-row"><label>Status</label><select id="sp-status"><option>Confirmed</option><option>Pending</option><option>Cancelled</option></select></div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('speaker-modal')">Cancel</button>
+      <button class="btn" onclick="addSpeaker()">Add Speaker</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="vendor-modal">
+  <div class="modal">
+    <div class="modal-title">Add New Vendor</div>
+    <div class="form-grid">
+      <div class="form-row"><label>Vendor Name</label><input placeholder="Company name" id="v-name"/></div>
+      <div class="form-row"><label>Category</label><select id="v-cat"><option>AV & Tech</option><option>Catering</option><option>Branding</option><option>Decor</option><option>Transport</option><option>Security</option></select></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row"><label>Contact</label><input placeholder="+91 XXXXX XXXXX" id="v-contact"/></div>
+      <div class="form-row"><label>Amount (₹)</label><input type="number" placeholder="0" id="v-amount"/></div>
+    </div>
+    <div class="form-row"><label>Status</label><select id="v-status"><option>Contract Signed</option><option>Negotiating</option><option>Pending</option></select></div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('vendor-modal')">Cancel</button>
+      <button class="btn" onclick="addVendor()">Add Vendor</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="guest-modal">
+  <div class="modal">
+    <div class="modal-title">Add New Guest</div>
+    <div class="form-grid">
+      <div class="form-row"><label>Full Name</label><input placeholder="Guest name" id="g-name"/></div>
+      <div class="form-row"><label>Organisation</label><input placeholder="Company / College" id="g-org"/></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row"><label>Email</label><input placeholder="guest@email.com" id="g-email"/></div>
+      <div class="form-row"><label>Type</label><select id="g-type"><option>General</option><option>VIP</option><option>Sponsor</option></select></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('guest-modal')">Cancel</button>
+      <button class="btn" onclick="addGuest()">Add Guest</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="budget-modal">
+  <div class="modal">
+    <div class="modal-title">Add Budget Item</div>
+    <div class="form-row"><label>Category</label><input placeholder="e.g. Photography" id="b-cat"/></div>
+    <div class="form-row"><label>Amount (₹)</label><input type="number" placeholder="0" id="b-amount"/></div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('budget-modal')">Cancel</button>
+      <button class="btn" onclick="addBudgetItem()">Add Item</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2500);
+}
+function toggleCheck(el) { el.classList.toggle('done'); }
+const colors = ['#E62B1E','#a06cd5','#ff6b35','#5dade2','#2ecc71','#e74c3c','#f39c12','#1abc9c'];
+function addSpeaker() {
+  const name = document.getElementById('sp-name').value.trim();
+  const topic = document.getElementById('sp-topic').value.trim();
+  const status = document.getElementById('sp-status').value;
+  if (!name) return;
+  const color = colors[Math.floor(Math.random()*colors.length)];
+  const bc = status==='Confirmed'?'confirmed':status==='Pending'?'pending':'cancelled';
+  const card = document.createElement('div');
+  card.className = 'speaker-card';
+  card.innerHTML = `<div class="speaker-avatar" style="background:${color}">${name[0].toUpperCase()}</div><div class="speaker-name">${name}</div><div class="speaker-topic">${topic}</div><div class="speaker-status"><span class="badge ${bc}">${status}</span></div>`;
+  document.getElementById('speaker-grid').appendChild(card);
+  closeModal('speaker-modal');
+  showToast('Speaker added!');
+  ['sp-name','sp-topic'].forEach(id => document.getElementById(id).value='');
+}
+function addVendor() {
+  const name = document.getElementById('v-name').value.trim();
+  const cat = document.getElementById('v-cat').value;
+  const contact = document.getElementById('v-contact').value;
+  const amount = document.getElementById('v-amount').value;
+  const status = document.getElementById('v-status').value;
+  if (!name) return;
+  const sc = status==='Contract Signed'?'confirmed':'pending';
+  const cc = cat.includes('AV')?'venue':cat==='Catering'?'speaker':'sponsor';
+  document.getElementById('vendor-body').insertAdjacentHTML('beforeend',
+    `<tr><td>${name}</td><td><span class="badge ${cc}">${cat}</span></td><td>${contact}</td><td class="budget-amt">${parseInt(amount||0).toLocaleString('en-IN')}</td><td><span class="badge ${sc}">${status}</span></td><td><button class="btn ghost small">Edit</button></td></tr>`);
+  closeModal('vendor-modal');
+  showToast('Vendor added!');
+}
+function addGuest() {
+  const name = document.getElementById('g-name').value.trim();
+  const org = document.getElementById('g-org').value;
+  const email = document.getElementById('g-email').value;
+  const type = document.getElementById('g-type').value;
+  if (!name) return;
+  const tc = type==='VIP'?'speaker':type==='Sponsor'?'sponsor':'venue';
+  document.getElementById('guest-body').insertAdjacentHTML('beforeend',
+    `<tr><td>${name}</td><td>${org}</td><td>${email}</td><td><span class="badge ${tc}">${type}</span></td><td><span class="badge confirmed">Confirmed</span></td><td><button class="btn ghost small">View</button></td></tr>`);
+  closeModal('guest-modal');
+  showToast('Guest added!');
+}
+function addBudgetItem() {
+  const cat = document.getElementById('b-cat').value.trim();
+  const amount = parseInt(document.getElementById('b-amount').value)||0;
+  if (!cat) return;
+  const list = document.getElementById('budget-list');
+  const row = document.createElement('div');
+  row.className = 'budget-row';
+  row.innerHTML = `<span class="budget-cat">${cat}</span><span class="budget-amt">₹${amount.toLocaleString('en-IN')}</span>`;
+  list.insertBefore(row, list.children[list.children.length-2]);
+  closeModal('budget-modal');
+  showToast('Budget item added!');
+}
+function searchGuests(q) {
+  document.querySelectorAll('#guest-body tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
